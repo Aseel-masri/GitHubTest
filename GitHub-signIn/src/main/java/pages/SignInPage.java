@@ -9,8 +9,8 @@ public class SignInPage {
 	By username = By.id("login_field");
 	By password = By.id("password");
 	By loginButton = By.name("commit");
-	private WebElement invalidField;
 	private WebElement flashAlert;
+	WebElement errorMessage;
 
 	public SignInPage(WebDriver driver) {
 		this.driver = driver;
@@ -41,7 +41,7 @@ public class SignInPage {
 		String validationMessage = driver.findElement(username).getAttribute("validationMessage");
 		if ("Please fill out this field.".equals(validationMessage)) {
 			return true;
-		} 
+		}
 
 		return false;
 	}
@@ -49,6 +49,11 @@ public class SignInPage {
 	public WebElement showFlashAlert() {
 		this.flashAlert = driver.findElement(By.className("js-flash-alert"));
 		return this.flashAlert;
+	}
+
+	public String getErrorMessage() {
+		this.errorMessage = driver.findElement(By.cssSelector(".flash-error"));
+		return errorMessage.getText();
 	}
 
 }

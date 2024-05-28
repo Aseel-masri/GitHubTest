@@ -1,19 +1,19 @@
 package tests;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+
 import static org.testng.Assert.assertTrue;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import pages.SignInPage;
 
-public class FireFoxTest {
+public class browserTest {
 	private WebDriver driver;
 	SignInPage signInObj;
 
@@ -35,10 +35,24 @@ public class FireFoxTest {
 		};
 	}
 
+	@Parameters("browser")
 	@BeforeMethod
-	public void setUp() {
-		driver = WebDriverManager.firefoxdriver().create();
-	        
+	public void setUp(String browser) {
+		// driver = WebDriverManager.chromedriver().create();
+		switch (browser.toLowerCase()) {
+		case "chrome":
+			driver = WebDriverManager.chromedriver().create();
+			break;
+		case "firefox":
+			driver = WebDriverManager.firefoxdriver().create();
+			break;
+		case "edge":
+			driver = WebDriverManager.edgedriver().create();
+			break;
+		default:
+			throw new IllegalArgumentException("Browser \"" + browser + "\" not supported.");
+		}
+
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 	}
 
@@ -48,25 +62,20 @@ public class FireFoxTest {
 		driver.get("https://github.com/login");
 		signInObj = new SignInPage(driver);
 		signInObj.loginOperation(username, password);
-		
+
 		switch (status) {
-		case "Valid Sign-In":
-
-			 assertEquals(driver.getCurrentUrl(), "https://github.com");
-
+		case "Valid Sign-In": //Successful sign-in; redirected to home page
+			Assert.assertTrue(driver.getTitle().contains("GitHub"), "Valid Sign-In test failed."); 
 			break;
-		case "Invalid Username":
-			assertNotNull(signInObj.showFlashAlert(), "The js-flash-alert element should exist on the page."); // <Incorrect username or password.> element
-			break;
+		case "Invalid Username": //Sign-in fails; appropriate error message
 		case "Invalid Password":
-			assertNotNull(signInObj.showFlashAlert(), "The js-flash-alert element should exist on the page."); // <Incorrect username or password.> element
+			Assert.assertTrue(signInObj.getErrorMessage().contains("Incorrect username or password."),
+					"Invalid username or password test failed.");
 			break;
-		case "Empty Fields":
-
-			assertTrue(signInObj.checkEmptyfield(), "should display (Please fill out this field)");
+		case "Empty Fields": //Sign-in fails; 
+			assertTrue(signInObj.checkEmptyfield(), "should display (Please fill out this field)"); // Check that the "Please fill out this field" alert is displayed
 			break;
 		default:
-
 			break;
 		}
 
