@@ -1,7 +1,6 @@
 package tests;
 
 
-import static org.testng.Assert.assertTrue;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.WebDriver;
 import org.testng.Assert;
@@ -24,13 +23,13 @@ public class browserTest {
 
 		{
 
-				{ "asaltest19@gmail.com", "password123456789s*", "Valid Sign-In" },
+				{ "asaltest19@gmail.com", "password123456789s*", true },
 
-				{ "asaltest1646449@gmail.com", "password123456789s*", "Invalid Username" },
+				{ "asaltest1646449@gmail.com", "password123456789s*", false },
 
-				{ "asaltest19@gmail.com", "password123456789sgg", "Invalid Password" },
+				{ "asaltest19@gmail.com", "password123456789sgg", false },
 
-				{ "", "", "Empty Fields" }
+				{ "", "", false }
 
 		};
 	}
@@ -57,26 +56,18 @@ public class browserTest {
 	}
 
 	@Test(dataProvider = "LoginDataProvider")
-	public void LogInTest(String username, String password, String status) {
+	public void LogInTest(String username, String password, boolean expectedResult) {
 		driver.manage().window().maximize();
 		driver.get("https://github.com/login");
 		signInObj = new SignInPage(driver);
 		signInObj.loginOperation(username, password);
+		if (expectedResult) {
+			Assert.assertTrue(signInObj.isSuccessfulSignIn());
 
-		switch (status) {
-		case "Valid Sign-In": //Successful sign-in; redirected to home page
-			Assert.assertTrue(driver.getTitle().contains("GitHub"), "Valid Sign-In test failed."); 
-			break;
-		case "Invalid Username": //Sign-in fails; appropriate error message
-		case "Invalid Password":
-			Assert.assertTrue(signInObj.getErrorMessage().contains("Incorrect username or password."),
-					"Invalid username or password test failed.");
-			break;
-		case "Empty Fields": //Sign-in fails; 
-			assertTrue(signInObj.checkEmptyfield(), "should display (Please fill out this field)"); // Check that the "Please fill out this field" alert is displayed
-			break;
-		default:
-			break;
+		} else {
+
+			Assert.assertTrue(signInObj.iisInvalidDataMessage());
+
 		}
 
 	}

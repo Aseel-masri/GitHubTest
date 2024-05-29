@@ -37,6 +37,21 @@ public class SignInPage {
 		this.login();
 	}
 
+	public boolean isSuccessfulSignIn() {
+		return driver.getTitle().contains("GitHub");
+	}
+
+	public boolean iisInvalidDataMessage() {
+
+		if (getErrorMessage().isEmpty() ) {
+			
+			return checkEmptyfield();
+		} else {
+			return getErrorMessage().contains("Incorrect username or password.");
+		}
+
+	}
+
 	public boolean checkEmptyfield() {
 		String validationMessage = driver.findElement(username).getAttribute("validationMessage");
 		if ("Please fill out this field.".equals(validationMessage)) {
